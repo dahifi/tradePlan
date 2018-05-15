@@ -8,8 +8,6 @@ class MyPrompt(Cmd):
 
     now = datetime.datetime.now()
     print (now.strftime("%Y-%m-%d %H:%M"))
-    # capital = input("Capital to deploy: ")
-    # capital = float(capital)
 
     def do_market(self, args):
         """

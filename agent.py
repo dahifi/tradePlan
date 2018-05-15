@@ -1,5 +1,5 @@
 from tradePlan import TradePlan as TP
-import sys
+import sys, json
 
 #read storage and list markets for all open positions
 
