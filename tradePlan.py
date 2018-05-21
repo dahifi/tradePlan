@@ -32,13 +32,15 @@ class TradePlan(object):
 
         self.CurrentPrice = my_bittrex.get_ticker(self.MarketName)['result']['Last']
         self.EntryPrice = self.CurrentPrice #initialy planned, needs to lock for open positions
+        self.ExitPricePlanned = self.EntryPrice * 1.3 # 30% gain
         self.PurchaseMax = CAPITAL_TOTAL / self.EntryPrice
         self.LossMax = CAPITAL_TOTAL * MAX_LOSS_PERCENTAGE
         self.StopLossMax = (CAPITAL_TOTAL - self.LossMax) / self.PurchaseMax
+
         self._setPurchaseAdjusted()
         self._setStopLossAdjusted()
         self.StopLossPlanned = self.StopLossMax
-        self.ExitPricePlanned = self.EntryPrice * 1.3 # 30% gain
+
         self._setProceedsPlanned()
         self._setCapitalRisked
 
@@ -56,6 +58,7 @@ class TradePlan(object):
     def show(self):
         #print ("Market: {} | Price: {} | Quantity: {} | Stop: {}".format(self.MarketName, ToSats(self.CurrentPrice), self.PurchaseAdjusted, ToSats(self.StopLossAdjusted)))
         print(self.toJSON())
+        """TODO: still no easy fix for json dump with satoshi price"""
 
     def setCapital(self, amount):
         self.CapitalToDeploy = amount
@@ -70,7 +73,9 @@ class TradePlan(object):
         self.show()
 
     def setExit(self, amount):
-        self
+        self.ExitPricePlanned = amount
+        self._setProceedsPlanned()
+
 
     def _setPurchaseAdjusted(self):
         self.PurchaseAdjusted = self.CapitalToDeploy / self.EntryPrice

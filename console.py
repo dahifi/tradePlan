@@ -17,12 +17,22 @@ class MyPrompt(Cmd):
         market = args
         agent.market(args)
 
+    def do_plans(self, args):
+        print(agent.plans)
+
 
     def do_capital(self, args):
         agent.capital(float(args))
 
     def do_entry(self, args):
         agent.entry(float(args))
+
+    def do_save(self, args):
+        agent.save()
+
+    def do_load(self, args):
+        agent.load()
+        print(agent.plans)
 
     def do_quit(self, args):
         """Quits the program."""
