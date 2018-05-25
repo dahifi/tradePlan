@@ -1,7 +1,7 @@
 from tradePlan import TradePlan as TP
 import sys, json, pickle
 
-#read storage and list markets for all open positions
+###todo: read storage and list markets for all open positions ###
 
 this = sys.modules[__name__]
 
@@ -11,6 +11,7 @@ plans = {}
 
 def market(currency):
     if currency not in plans:
+
         plan = TP(currency)
         plans[currency] = plan
     this.activeCurrency = plans[currency]
