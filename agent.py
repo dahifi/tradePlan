@@ -1,20 +1,30 @@
 from tradePlan import TradePlan as TP
 import sys, json, pickle
 
-###todo: read storage and list markets for all open positions ###
+"""TODO: read storage and list markets for all open positions"""
 
 this = sys.modules[__name__]
 
 activeCurrency = None
 plans = {}
 
+"""TODO: Make class and load on __init__"""
+
+
 
 def market(currency):
+    currency = currency.upper()
     if currency not in plans:
-
-        plan = TP(currency)
-        plans[currency] = plan
+        if TP.isValid(currency):
+            plan = TP(currency)
+            plans[currency] = plan
+        else:
+            return
     this.activeCurrency = plans[currency]
+    this.activeCurrency._setCurrentPrice()
+
+def show():
+    this.activeCurrency.show()
 
 
 def capital(amount):
@@ -34,6 +44,8 @@ def load():
     this.plans = pickle.load(open("plans.p", "rb"))
     """TODO: load will overwrite currently loaded plans. Make sure load only happens on program start"""
 
+def execute():
+    this.activeCurrency.execute()
 
 if __name__ == '__main__':
     ADA = market("ADA")

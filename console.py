@@ -20,12 +20,18 @@ class MyPrompt(Cmd):
     def do_plans(self, args):
         print(agent.plans)
 
+    def do_show(self, args):
+        agent.show();
 
     def do_capital(self, args):
         agent.capital(float(args))
 
     def do_entry(self, args):
         agent.entry(float(args))
+
+    #only tests for now
+    def do_execute(self, args):
+        agent.execute()
 
     def do_save(self, args):
         agent.save()

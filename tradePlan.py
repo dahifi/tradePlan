@@ -3,6 +3,7 @@
 import datetime
 import sys, json
 from decimal import *
+import Exchange
 from bittrex.bittrex import Bittrex
 my_bittrex = Bittrex(None, None)
 
@@ -12,6 +13,12 @@ MAX_LOSS_PERCENTAGE = 0.02  # Two percent
 BASE_CURRENCY = "BTC"
 CAPITAL_TOTAL = 0.4 #BTC
 
+currencies = []
+exchange = my_bittrex.get_currencies()['result']
+for currency in exchange:
+    currencies.append(currency['Currency'])
+
+
 class TradePlan(object):
     """
     All the information about a planned, active, or closed trade
@@ -20,10 +27,7 @@ class TradePlan(object):
 
 
     """
-    currencies = []
-    exchange = my_bittrex.get_currencies()['result']
-    for currency in exchange:
-        currencies.append(currency['Currency'])
+
 
 
     def __init__(self, currency, capital = CAPITAL_TOTAL ):
@@ -31,19 +35,10 @@ class TradePlan(object):
         Intializes basic information to start plan
         """
 
-        #check whether currency exists
-
-        if not (currency in TradePlan.currencies):
-            print ("Currency not found.")
-            return
-
         #common parameters
-
-
-
         self.CapitalToDeploy = capital if capital is not None else CAPITAL_TOTAL
         self.Created = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        #self.BTCPrice = 9655.00  ###<TODO> call BTC price from CMC or GDAX
+        self.BTCPrice = Exchange.quote('BTC')
         self.MarketCurrency = currency
         self.MarketName = BASE_CURRENCY + "-" + self.MarketCurrency
         if (not self._setCurrentPrice()): return #ticker not found
@@ -73,8 +68,23 @@ class TradePlan(object):
         self.show()
 
     def show(self):
-        #print ("Market: {} | Price: {} | Quantity: {} | Stop: {}".format(self.MarketName, ToSats(self.CurrentPrice), self.PurchaseAdjusted, ToSats(self.StopLossAdjusted)))
-        print(self.toJSON())
+        output = """
+        Market: {market}
+        Current Price: {price}
+        Entry Price: {entry}
+        Quantity: {quantity}
+        Stop: {stop}
+        """.format(
+            market = self.MarketName,
+            price = ToSats(self.CurrentPrice),
+            entry = ToSats(self.EntryPrice),
+            quantity = self.PurchaseAdjusted,
+            stop = ToSats(self.StopLossAdjusted),
+
+        )
+
+        print(output)
+        #print(self.toJSON())
         """TODO: still no easy fix for json dump with satoshi price"""
 
     def setCapital(self, amount):
@@ -118,6 +128,30 @@ class TradePlan(object):
         except TypeError:
             print("Market not valid. Try again")
             return False
+
+    def execute(self):
+        output = """
+        Executing Trade Plan with {capital} BTC:
+        {market} @ {entry} satoshis x {purchase} quantity
+        Stop @ {stop}
+        Exit @ {exit}
+        """.format(
+            capital=self.CapitalToDeploy,
+            market=self.MarketName,
+            entry=ToSats(self.EntryPrice),
+            purchase=self.PurchaseAdjusted,
+            stop=ToSats(self.StopLossAdjusted),
+            exit=ToSats(self.ExitPricePlanned),
+        )
+
+        print (output)
+
+    def isValid(token):
+        if not (token in this.currencies):
+            print("Currency not found.")
+            return False
+        else:
+            return True
 
 
 def ToSats(float):
