@@ -1,7 +1,8 @@
 
 
 import datetime
-import sys, json
+import sys
+import json
 from decimal import *
 import Exchange
 from bittrex.bittrex import Bittrex
@@ -11,7 +12,7 @@ this = sys.modules[__name__]
 
 MAX_LOSS_PERCENTAGE = 0.02  # Two percent
 BASE_CURRENCY = "BTC"
-CAPITAL_TOTAL = 0.4 #BTC
+CAPITAL_TOTAL = 0.4  # BTC
 
 currencies = []
 exchange = my_bittrex.get_currencies()['result']
@@ -23,14 +24,9 @@ class TradePlan(object):
     """
     All the information about a planned, active, or closed trade
     Methods w/o underscore are public, underscores used for internal recalculations
-
-
-
     """
 
-
-
-    def __init__(self, currency, capital = CAPITAL_TOTAL ):
+    def __init__(self, currency, capital=CAPITAL_TOTAL):
         """
         Intializes basic information to start plan
         """
@@ -41,7 +37,7 @@ class TradePlan(object):
         self.BTCPrice = Exchange.quote('BTC')
         self.MarketCurrency = currency
         self.MarketName = BASE_CURRENCY + "-" + self.MarketCurrency
-        if (not self._setCurrentPrice()): return #ticker not found
+        if (not self.setCurrentPrice()): return #ticker not found
 
         self.EntryPrice = self.CurrentPrice #initialy planned, needs to lock for open positions
         self.ExitPricePlanned = self.EntryPrice * 1.3 # 30% gain
@@ -75,16 +71,16 @@ class TradePlan(object):
         Quantity: {quantity}
         Stop: {stop}
         """.format(
-            market = self.MarketName,
-            price = ToSats(self.CurrentPrice),
-            entry = ToSats(self.EntryPrice),
-            quantity = self.PurchaseAdjusted,
-            stop = ToSats(self.StopLossAdjusted),
+            market=self.MarketName,
+            price=ToSats(self.CurrentPrice),
+            entry=ToSats(self.EntryPrice),
+            quantity=self.PurchaseAdjusted,
+            stop=ToSats(self.StopLossAdjusted),
 
         )
 
         print(output)
-        #print(self.toJSON())
+        # print(self.toJSON())
         """TODO: still no easy fix for json dump with satoshi price"""
 
     def setCapital(self, amount):
@@ -117,11 +113,11 @@ class TradePlan(object):
         self.ProceedsPlanned = self.PurchaseAdjusted * self.ExitPricePlanned
 
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__,
+        return json.dumps(self,default=lambda o:o.__dict__,
             sort_keys=True, indent=4)
 
-    #try block may be unnecessary since addition of TradePlan.currencies check.
-    def _setCurrentPrice(self):
+    # try block may be unnecessary since addition of TradePlan.currencies check.
+    def setCurrentPrice(self):
         try:
             self.CurrentPrice = my_bittrex.get_ticker(self.MarketName)['result']['Last']
             return True
@@ -144,7 +140,7 @@ class TradePlan(object):
             exit=ToSats(self.ExitPricePlanned),
         )
 
-        print (output)
+        print(output)
 
     def isValid(token):
         if not (token in this.currencies):
