@@ -1,4 +1,9 @@
+
+
+
 class Currency:
+
+
 
     def __init__(self, json):
         # name, symbol, cmc_id, cmc_slug

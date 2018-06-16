@@ -1,5 +1,7 @@
 from tradePlan import TradePlan as TP
 from position import Position
+from currency import Currency
+from market import Market
 import sys
 # import json
 import pickle
@@ -10,6 +12,9 @@ import pickle
 
 this = sys.modules[__name__]
 
+
+activeToken = None
+tokens = {}
 activeCurrency = None
 plans = {}
 
@@ -17,16 +22,33 @@ plans = {}
 """TODO: Make class and load on __init__"""
 
 
+def token(symbol):
+    if symbol not in tokens:
+        new_coin = Market.currency(symbol)
+        print (new_coin)
+        tokens[symbol] = new_coin
+
+    else:
+        print("not found")
+        return
+    this.activeToken = new_coin
+    return new_coin
+
+
+
 def market(currency):
     currency = currency.upper()
     if currency not in plans:
+
         if TP.isValid(currency):
             plan = TP(currency)
             plans[currency] = plan
         else:
             return
+
+
     this.activeCurrency = plans[currency]
-    this.activeCurrency.setCurrentPrice()
+
 
 
 def show():
@@ -63,6 +85,4 @@ def execute():
 this.load()
 
 if __name__ == '__main__':
-    ADA = Position(market("ADA"))
-    print(ADA)
-
+    pass

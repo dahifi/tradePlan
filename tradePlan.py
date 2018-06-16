@@ -4,9 +4,8 @@ import datetime
 import sys
 import json
 from decimal import *
-import Exchange
-from bittrex.bittrex import Bittrex
-my_bittrex = Bittrex(None, None)
+#import Exchange
+from market import Market as Crypto
 
 this = sys.modules[__name__]
 
@@ -15,10 +14,6 @@ BASE_CURRENCY = "BTC"
 CAPITAL_TOTAL = 0.4  # BTC
 
 currencies = []
-exchange = my_bittrex.get_currencies()['result']
-for currency in exchange:
-    currencies.append(currency['Currency'])
-
 
 class TradePlan(object):
     """
@@ -30,14 +25,18 @@ class TradePlan(object):
         """
         Intializes basic information to start plan
         """
+        self.MarketCurrency = Crypto.Currency(currency)
+        self.CurrentPrice = self.MarketCurrency.price_btc
+
+
+
+
 
         #common parameters
         self.CapitalToDeploy = capital if capital is not None else CAPITAL_TOTAL
         self.Created = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        self.BTCPrice = Exchange.quote('BTC')
-        self.MarketCurrency = currency
-        self.MarketName = BASE_CURRENCY + "-" + self.MarketCurrency
-        if (not self.setCurrentPrice()): return #ticker not found
+        self.MarketName = BASE_CURRENCY + "-" + self.MarketCurrency.symbol
+
 
         self.EntryPrice = self.CurrentPrice #initialy planned, needs to lock for open positions
         self.ExitPricePlanned = self.EntryPrice * 1.3 # 30% gain
@@ -53,7 +52,7 @@ class TradePlan(object):
         self._setCapitalRisked
 
 
-        #for open positions
+        #for open positions -- move to subclass
         # self.CurrentChange = (self.CurrentPrice - self.EntryPrice) / self.EntryPrice
         #
         # #for closed positions
@@ -80,8 +79,6 @@ class TradePlan(object):
         )
 
         print(output)
-        # print(self.toJSON())
-        """TODO: still no easy fix for json dump with satoshi price"""
 
     def setCapital(self, amount):
         self.CapitalToDeploy = amount
@@ -116,14 +113,19 @@ class TradePlan(object):
         return json.dumps(self,default=lambda o:o.__dict__,
             sort_keys=True, indent=4)
 
+
+
+
+
+
     # try block may be unnecessary since addition of TradePlan.currencies check.
-    def setCurrentPrice(self):
-        try:
-            self.CurrentPrice = my_bittrex.get_ticker(self.MarketName)['result']['Last']
-            return True
-        except TypeError:
-            print("Market not valid. Try again")
-            return False
+    # def setCurrentPrice(self):
+    #     try:
+    #         self.CurrentPrice = my_bittrex.get_ticker(self.MarketName)['result']['Last']
+    #         return True
+    #     except TypeError:
+    #         print("Market not valid. Try again")
+    #         return False
 
     def execute(self):
         output = """
@@ -142,14 +144,19 @@ class TradePlan(object):
 
         print(output)
 
-    def isValid(token):
-        if not (token in this.currencies):
-            print("Currency not found.")
-            return False
+    def isValid(currency):
+        if not (currency in this.currencies):
+            try:
+                token = Crypto.Currency(currency)
+                this.currencies.append(token)
+                return True
+            except Exception:
+                print("Invalid symbol")
+                return False
         else:
             return True
 
-
+"""TODO: Move this to CURRENCY class"""
 def ToSats(float):
     """
     Converts float in scientific notation to Satoshi value
